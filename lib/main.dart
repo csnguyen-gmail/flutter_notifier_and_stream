@@ -71,16 +71,26 @@ class BoxPool extends StatelessWidget {
 class Box extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    print("Box");
-    var box = Provider.of<BoxModel>(context, listen: true); // "listen: true" equalize to Consumer
-    return Center(
-      child: Container(
-        width: 120.0,
-        height: 120.0,
-        decoration: BoxDecoration(
-          color: box.color,
-        ),
-      ),
+    return Consumer<BoxModel>(
+      builder: (context, box, _) {
+        print("Box");
+        if (box.color == null) {
+          return Center(child: CircularProgressIndicator());
+        }
+        return GestureDetector(
+          onTap: () => Provider.of<BoxPoolModel>(context, listen: false).updateBox(box),
+          child: Center(
+            child: Container(
+              width: 120.0,
+              height: 120.0,
+              decoration: BoxDecoration(
+                color: box.color,
+              ),
+            ),
+          ),
+        );
+      },
+      child: BoxPoolHeader(),
     );
   }
 }
@@ -106,10 +116,6 @@ class _BoxPoolControllerState extends State<BoxPoolController> {
           child: Text('+'),
           onPressed: addBox,
         ),
-        RaisedButton(
-          child: Text('RandomUpdate'),
-          onPressed: randomUpdate,
-        ),
       ],
     );
   }
@@ -120,10 +126,6 @@ class _BoxPoolControllerState extends State<BoxPoolController> {
 
   void removeBox() {
     Provider.of<BoxPoolModel>(context, listen: false).removeLast();
-  }
-
-  void randomUpdate() {
-    Provider.of<BoxPoolModel>(context, listen: false).randomUpdate();
   }
 }
 

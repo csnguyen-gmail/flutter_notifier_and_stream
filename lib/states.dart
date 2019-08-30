@@ -1,36 +1,43 @@
 import 'dart:collection';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:im_back/services.dart';
 
 class BoxPoolModel with ChangeNotifier{
   final List<BoxModel> _items = [];
 
-  UnmodifiableListView<BoxModel> get items => UnmodifiableListView(_items);
+  BoxPoolModel();
 
-  void add() {
-    var box = BoxModel();
-    box.color = generateColor();
-    _items.add(box);
-    // This call tells the widgets that are listening to this model to rebuild.
-    notifyListeners();
-  }
+  UnmodifiableListView<BoxModel> get items => UnmodifiableListView(_items);
 
   void removeLast() {
     if (_items.length == 0) return;
     _items.removeLast();
-    // This call tells the widgets that are listening to this model to rebuild.
+    // rebuild pool
     notifyListeners();
   }
 
-  void randomUpdate() {
-    var box = _items[Random().nextInt(_items.length)];
-    box.color = generateColor();
+  void add() {
+    // add blank model
+    var box = BoxModel();
+    _items.add(box);
+    // rebuild pool
+    notifyListeners();
+    // update box
+    updateBox(box);
   }
 
-  // util
-  Color generateColor() {
-    return Color((Random().nextDouble() * 0xFFFFFF).toInt() << 0).withOpacity(1.0);
+  void updateBox(BoxModel box) async{
+    box.color = null;
+    try {
+      // async api
+      box.color = await Api().generateColor();
+    } catch (err) {
+      print(err);
+      _items.remove(box);
+      // rebuild pool
+      notifyListeners();
+    }
   }
 }
 
@@ -39,9 +46,20 @@ class BoxModel with ChangeNotifier{
 
   Color get color => _color;
   set color(Color value) {
+    if (value == _color) return;
     _color = value;
-    // This call tells the widgets that are listening to this model to rebuild.
+    // rebuild box
     notifyListeners();
   }
+}
 
+class ErrorModel with ChangeNotifier{
+  String _error;
+
+  String get error => _error;
+  set color(String value) {
+    _error = value;
+    // rebuild box
+    notifyListeners();
+  }
 }
