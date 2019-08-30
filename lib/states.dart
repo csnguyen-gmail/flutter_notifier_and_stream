@@ -5,8 +5,9 @@ import 'package:im_back/services.dart';
 
 class BoxPoolModel with ChangeNotifier{
   final List<BoxModel> _items = [];
+  final ErrorModel errorModel;  // raise error to others
 
-  BoxPoolModel();
+  BoxPoolModel({this.errorModel});
 
   UnmodifiableListView<BoxModel> get items => UnmodifiableListView(_items);
 
@@ -33,10 +34,11 @@ class BoxPoolModel with ChangeNotifier{
       // async api
       box.color = await Api().generateColor();
     } catch (err) {
-      print(err);
       _items.remove(box);
       // rebuild pool
       notifyListeners();
+      // error notify
+      errorModel.content = err;
     }
   }
 }
@@ -54,11 +56,11 @@ class BoxModel with ChangeNotifier{
 }
 
 class ErrorModel with ChangeNotifier{
-  String _error;
+  String _content;
 
-  String get error => _error;
-  set color(String value) {
-    _error = value;
+  String get content => _content;
+  set content(String value) {
+    _content = value;
     // rebuild box
     notifyListeners();
   }

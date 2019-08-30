@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:im_back/states.dart';
 import 'package:provider/provider.dart';
 
-void main() => runApp(Main());
+void main() {
+  Provider.debugCheckInvalidValueType = null;
+  runApp(Main());
+}
+
 
 // MAIN
 class Main extends StatelessWidget {
@@ -12,18 +16,55 @@ class Main extends StatelessWidget {
     return MaterialApp(
       home: MultiProvider(
         providers: [
-          ChangeNotifierProvider(builder: (context) => BoxPoolModel()),
+          Provider(builder: (_) => ErrorModel()),
+          ChangeNotifierProxyProvider<ErrorModel, BoxPoolModel>(
+            initialBuilder: null,
+            builder: (_, error, __) => BoxPoolModel(errorModel: error), // inject ErrorModel to BoxPoolModel
+          ),
         ],
         child: Scaffold(
-          body: SafeArea(
-            child: Column(
-              children: <Widget>[
-                Expanded(child: BoxPool()),
-                BoxPoolController(),
-              ],
-            ),
-          ),
+          body: Body(),
         ),
+      ),
+    );
+  }
+}
+
+// BODY
+class Body extends StatefulWidget {
+  @override
+  _BodyState createState() => _BodyState();
+}
+
+class _BodyState extends State<Body> {
+  // Body will response handle showing error
+  @override
+  void initState() {
+    super.initState();
+    var errorModel = Provider.of<ErrorModel>(context, listen: false);
+    errorModel.addListener(_showError);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    var errorModel = Provider.of<ErrorModel>(context, listen: false);
+    errorModel.removeListener(_showError);
+  }
+
+  void _showError() {
+    var errorModel = Provider.of<ErrorModel>(context, listen: false);
+    Scaffold.of(context).showSnackBar(SnackBar(content: Text(errorModel.content),));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        children: <Widget>[
+          Expanded(child: BoxPool()),
+          BoxPoolController(),
+        ],
       ),
     );
   }
@@ -96,13 +137,7 @@ class Box extends StatelessWidget {
 }
 
 // BOX CONTROLLER
-class BoxPoolController extends StatefulWidget {
-  @override
-  _BoxPoolControllerState createState() => _BoxPoolControllerState();
-}
-
-class _BoxPoolControllerState extends State<BoxPoolController> {
-
+class BoxPoolController extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -110,22 +145,14 @@ class _BoxPoolControllerState extends State<BoxPoolController> {
       children: <Widget>[
         RaisedButton(
           child: Text('-'),
-          onPressed: removeBox,
+          onPressed: Provider.of<BoxPoolModel>(context, listen: false).removeLast,
         ),
         RaisedButton(
           child: Text('+'),
-          onPressed: addBox,
+          onPressed: Provider.of<BoxPoolModel>(context, listen: false).add,
         ),
       ],
     );
-  }
-
-  void addBox() {
-    Provider.of<BoxPoolModel>(context, listen: false).add();
-  }
-
-  void removeBox() {
-    Provider.of<BoxPoolModel>(context, listen: false).removeLast();
   }
 }
 
