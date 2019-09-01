@@ -1,13 +1,15 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:im_back/services.dart';
+import 'package:im_back/basic/services.dart';
 
 class BoxPoolModel with ChangeNotifier{
   final List<BoxModel> _items = [];
-  final ErrorModel errorModel;  // raise error to others
+  final BoxBaseApi api;
 
-  BoxPoolModel({this.errorModel});
+  BoxPoolModel({
+    @required this.api,
+  });
 
   UnmodifiableListView<BoxModel> get items => UnmodifiableListView(_items);
 
@@ -30,37 +32,15 @@ class BoxPoolModel with ChangeNotifier{
 
   void updateBox(BoxModel box) async{
     box.color = null;
-    try {
-      // async api
-      box.color = await Api().generateColor();
-    } catch (err) {
-      _items.remove(box);
-      // rebuild pool
-      notifyListeners();
-      // error notify
-      errorModel.content = err;
-    }
+    box.color = await api.generateColor();
   }
 }
 
 class BoxModel with ChangeNotifier{
   Color _color;
-
   Color get color => _color;
   set color(Color value) {
-    if (value == _color) return;
     _color = value;
-    // rebuild box
-    notifyListeners();
-  }
-}
-
-class ErrorModel with ChangeNotifier{
-  String _content;
-
-  String get content => _content;
-  set content(String value) {
-    _content = value;
     // rebuild box
     notifyListeners();
   }
