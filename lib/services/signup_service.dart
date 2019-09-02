@@ -3,10 +3,9 @@ abstract class SignUpBaseApi {
 }
 
 class SignUpApi implements SignUpBaseApi{
-
   @override
   Future<bool> checkAccountValid(String account) async{
     await Future.delayed(Duration(milliseconds: 500));
-    return account != "csnguyen";
+    return account.length > 0 && account != "csnguyen";
   }
 }

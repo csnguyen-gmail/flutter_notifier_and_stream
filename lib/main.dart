@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:im_back/basic/ui.dart';
-import 'package:im_back/form_bloc/ui.dart';
+import 'package:im_back/form_stream/ui.dart';
+
+import 'form_notifier/ui.dart';
 
 void main() {
   runApp(Main());
@@ -14,7 +16,7 @@ class Main extends StatefulWidget {
 
 class _MainState extends State<Main> {
   int _currentIndex = 0;
-  final List<Widget> _children = [ProviderBasic(), SignUpForm()];
+  final List<Widget> _children = [ProviderBasic(), FormByNotifier(), FormByStream()];
 
   void onTabTapped(int index) {
     setState(() {
@@ -37,8 +39,12 @@ class _MainState extends State<Main> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.assignment_ind),
-              title: Text('Form Bloc'),
-            )
+              title: Text('Form Notifier'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.assignment_ind),
+              title: Text('Form Stream'),
+            ),
           ],
         ),
       ),

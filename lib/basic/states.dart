@@ -1,7 +1,7 @@
 import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:im_back/basic/services.dart';
+import 'package:im_back/services/box_service.dart';
 
 class BoxPoolModel with ChangeNotifier{
   final List<BoxModel> _items = [];
@@ -20,7 +20,7 @@ class BoxPoolModel with ChangeNotifier{
     notifyListeners();
   }
 
-  void add() {
+  Future add() async{
     // add blank model
     var box = BoxModel();
     _items.add(box);

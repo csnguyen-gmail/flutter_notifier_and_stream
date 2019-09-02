@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:im_back/form_bloc/services.dart';
+import 'package:im_back/services/signup_service.dart';
 import 'package:rxdart/rxdart.dart';
 
 class SignUpBloc {
@@ -13,16 +13,16 @@ class SignUpBloc {
 
   // subjects
   final _accountSubject = BehaviorSubject<String>();
-  final _passSubject = BehaviorSubject<String>();
+  final _pass1Subject = BehaviorSubject<String>();
   final _pass2Subject = BehaviorSubject<String>();
   final _accountCheckingSubject = BehaviorSubject<bool>.seeded(false);
 
   // triggers
   Function(String) get changeAccount => _accountSubject.sink.add;
-  Function(String) get changePass => _passSubject.sink.add;
+  Function(String) get changePass1 => _pass1Subject.sink.add;
   Function(String) get changePass2 => _pass2Subject.sink.add;
   Function() get submit => (){
-    print("Account: ${_accountSubject.value}, Pass: ${_passSubject.value}");
+    print("Account: ${_accountSubject.value}, Pass: ${_pass1Subject.value}");
   };
 
   // signals
@@ -40,21 +40,21 @@ class SignUpBloc {
       })
   );
   Stream<bool> get accountChecking => _accountCheckingSubject.stream;
-  Stream<bool> get passValid => _passSubject.stream.transform(
+  Stream<bool> get pass1Valid => _pass1Subject.stream.transform(
       StreamTransformer<String, bool>.fromHandlers(handleData: (pass, sink) {
-        if (pass.length >= 4) {
-          sink.add(true);
-        } else {
-          sink.add(false);
-        }
+        sink.add(pass.length >= 4);
       })
   );
-  Stream<bool> get pass2Valid => Observable.combineLatest2(_passSubject.stream, _pass2Subject.stream, (p1, p2) => p1 == p2);
-  Stream<bool> get submitValid => Observable.combineLatest3(accountValid, passValid, pass2Valid, (a, p1, p2) => a & p1 & p2);
+  Stream<bool> get pass2Valid => Observable.combineLatest3(
+      _pass1Subject.stream, _pass2Subject.stream, pass1Valid, (p1, p2, p1Valid) => p1Valid & (p1 == p2)
+  );
+  Stream<bool> get submitValid => Observable.combineLatest3(
+      accountValid, pass1Valid, pass2Valid, (a, p1, p2) => a & p1 & p2
+  );
 
   dispose() {
     _accountSubject.close();
-    _passSubject.close();
+    _pass1Subject.close();
     _pass2Subject.close();
     _accountCheckingSubject.close();
   }
