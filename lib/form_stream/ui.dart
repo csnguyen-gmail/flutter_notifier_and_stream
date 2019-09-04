@@ -11,6 +11,7 @@ class FormByStream extends StatelessWidget {
       builder: (_) => SignUpBloc(
         api: SignUpApi(), // inject API
       ),
+      dispose: (_, bloc) => bloc.dispose(),
       child: Builder(builder: (context) => _buildForm(context)),
     );
   }

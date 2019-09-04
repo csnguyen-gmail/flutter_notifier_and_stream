@@ -53,10 +53,10 @@ class SignUpBloc {
   );
 
   dispose() {
+    print("bloc dispose");
     _accountSubject.close();
     _pass1Subject.close();
     _pass2Subject.close();
     _accountCheckingSubject.close();
   }
-
 }
